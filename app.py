@@ -44,7 +44,8 @@ ats_analyzer = ATSAnalyzer()
 ai_recommender = AIRecommender()
 db_manager = DatabaseManager()
 
-# Ensure upload folder exists
+# Ensure database and upload folder exist
+db_manager.init_db()
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 
@@ -293,9 +294,6 @@ def internal_error(error):
 
 
 if __name__ == '__main__':
-    # Initialize database
-    db_manager.init_db()
-    
     # Run app
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('FLASK_ENV') == 'development'
