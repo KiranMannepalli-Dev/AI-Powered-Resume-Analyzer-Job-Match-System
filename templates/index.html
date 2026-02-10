@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="AI-Powered Resume Analyzer & Job Match System - Analyze your resume, match with jobs, and get AI-powered recommendations">
+    <title>AI Resume Analyzer - Smart Job Matching & ATS Optimization</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">🎯</div>
+                    <span>AI Resume Analyzer</span>
+                </div>
+                <nav class="nav">
+                    <button class="btn btn-secondary" onclick="scrollToSection('upload')">Upload Resume</button>
+                    <button class="btn btn-primary" onclick="scrollToSection('analyze')">Analyze</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">Transform Your Job Search with AI</h1>
+            <p class="hero-subtitle">
+                Upload your resume, match with jobs, and get intelligent recommendations to land your dream role
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-primary btn-large" onclick="scrollToSection('upload')">
+                    <span>🚀</span>
+                    Get Started
+                </button>
+                <button class="btn btn-secondary btn-large" onclick="showDemo()">
+                    <span>▶️</span>
+                    Watch Demo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="text-center mb-xl">Powerful Features</h2>
+            <div class="grid grid-3">
+                <div class="card">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+                    <h3>Smart Resume Parsing</h3>
+                    <p>Extract skills, experience, and education from PDF and DOCX files using advanced NLP</p>
+                </div>
+                <div class="card">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                    <h3>Job Matching</h3>
+                    <p>AI-powered algorithm matches your resume with job descriptions and calculates compatibility</p>
+                </div>
+                <div class="card">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                    <h3>ATS Optimization</h3>
+                    <p>Check how well your resume passes Applicant Tracking Systems and get improvement tips</p>
+                </div>
+                <div class="card">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💡</div>
+                    <h3>AI Recommendations</h3>
+                    <p>Get personalized suggestions to improve your resume and increase your chances</p>
+                </div>
+                <div class="card">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <h3>Skill Gap Analysis</h3>
+                    <p>Identify missing skills for target positions and get learning recommendations</p>
+                </div>
+                <div class="card">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
+                    <h3>Visual Analytics</h3>
+                    <p>Beautiful charts and graphs showing your profile strength and areas to improve</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <section id="upload" class="section">
+        <div class="container">
+            <h2 class="text-center mb-lg">Upload Your Resume</h2>
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📤</div>
+                    <h3>Drag & Drop Your Resume</h3>
+                    <p class="text-secondary">or click to browse</p>
+                    <p class="text-muted" style="font-size: 0.875rem; margin-top: 1rem;">
+                        Supported formats: PDF, DOCX (Max 16MB)
+                    </p>
+                    <input type="file" id="fileInput" accept=".pdf,.docx" style="display: none;">
+                </div>
+
+                <div id="uploadProgress" class="hidden mt-lg">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <p class="text-center mt-sm" id="progressText">Uploading...</p>
+                </div>
+
+                <div id="uploadSuccess" class="hidden mt-lg text-center">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+                    <h3>Resume Uploaded Successfully!</h3>
+                    <p class="text-secondary">Your resume has been analyzed. View results below.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analysis Results Section -->
+    <section id="analyze" class="section hidden">
+        <div class="container">
+            <h2 class="text-center mb-xl">Resume Analysis</h2>
+
+            <!-- ATS Score -->
+            <div class="card mb-lg">
+                <h3 class="text-center mb-lg">ATS Compatibility Score</h3>
+                <div class="score-circle">
+                    <div class="score-value" id="atsScore">--</div>
+                    <div class="score-label">Score</div>
+                </div>
+                <div class="text-center mt-lg">
+                    <span class="badge badge-primary" id="atsGrade">Grade: --</span>
+                </div>
+            </div>
+
+            <!-- Skills & Experience Grid -->
+            <div class="grid grid-2 mb-lg">
+                <!-- Skills -->
+                <div class="card">
+                    <h3>Identified Skills</h3>
+                    <div id="skillsList" class="mt-md">
+                        <p class="text-muted">No skills identified yet</p>
+                    </div>
+                </div>
+
+                <!-- Experience -->
+                <div class="card">
+                    <h3>Experience Summary</h3>
+                    <div id="experienceSummary" class="mt-md">
+                        <p class="text-muted">No experience data yet</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Chart -->
+            <div class="card mb-lg">
+                <h3 class="mb-lg">Skills Distribution</h3>
+                <canvas id="skillsChart" style="max-height: 300px;"></canvas>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="card mb-lg">
+                <h3 class="mb-lg">💡 AI Recommendations</h3>
+                <div id="recommendationsList">
+                    <p class="text-muted">Loading recommendations...</p>
+                </div>
+            </div>
+
+            <!-- Recommended Career Searches -->
+            <div class="card">
+                <h3 class="mb-lg">🌐 Recommended Career Searches</h3>
+                <div id="searchResultsList" class="grid grid-3">
+                    <p class="text-muted">Analyzing career opportunities...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Job Matching Section -->
+    <section id="jobMatch" class="section hidden">
+        <div class="container">
+            <h2 class="text-center mb-xl">Job Matching</h2>
+
+            <div class="card mb-lg" style="max-width: 900px; margin: 0 auto;">
+                <h3 class="mb-md">Paste Job Description</h3>
+                <div class="form-group">
+                    <label class="form-label" for="jobDescription">Job Description</label>
+                    <textarea id="jobDescription" class="form-textarea" placeholder="Paste the job description here..."
+                        rows="10"></textarea>
+                </div>
+                <button class="btn btn-accent btn-large" onclick="matchJob()" id="matchBtn">
+                    <span>🎯</span>
+                    Match with Job
+                </button>
+            </div>
+
+            <!-- Match Results -->
+            <div id="matchResults" class="hidden">
+                <div class="grid grid-2 mb-lg">
+                    <!-- Overall Match Score -->
+                    <div class="card">
+                        <h3 class="text-center mb-lg">Overall Match</h3>
+                        <div class="score-circle">
+                            <div class="score-value" id="matchScore">--</div>
+                            <div class="score-label">Match %</div>
+                        </div>
+                        <p class="text-center mt-lg" id="matchRecommendation">--</p>
+                    </div>
+
+                    <!-- Match Breakdown -->
+                    <div class="card">
+                        <h3 class="mb-md">Match Breakdown</h3>
+                        <div class="mt-md">
+                            <div class="mb-md">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Skill Match</span>
+                                    <span id="skillMatchPercent">--</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="skillMatchBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-md">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Content Similarity</span>
+                                    <span id="similarityPercent">--</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="similarityBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Experience Match</span>
+                                    <span id="experiencePercent">--</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="experienceBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skill Gap Analysis -->
+                <div class="grid grid-2">
+                    <div class="card">
+                        <h3 class="mb-md">✅ Matched Skills</h3>
+                        <div id="matchedSkillsList" class="mt-md">
+                            <p class="text-muted">No matched skills</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="mb-md">❌ Missing Skills</h3>
+                        <div id="missingSkillsList" class="mt-md">
+                            <p class="text-muted">No missing skills</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="section" style="background: var(--bg-secondary); margin-top: 4rem;">
+        <div class="container text-center">
+            <div class="logo" style="justify-content: center; margin-bottom: 1rem;">
+                <div class="logo-icon">🎯</div>
+                <span>AI Resume Analyzer</span>
+            </div>
+            <p class="text-secondary">
+                Empowering job seekers with AI-powered resume analysis and job matching
+            </p>
+            <p class="text-muted" style="font-size: 0.875rem; margin-top: 2rem;">
+                © 2026 AI Resume Analyzer. Made with ❤️ for job seekers worldwide.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>
