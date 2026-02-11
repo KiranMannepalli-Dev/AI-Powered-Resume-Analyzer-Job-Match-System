@@ -6,7 +6,7 @@ try:
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
-    print("Warning: scikit-learn/numpy not found. Using simple keyword matching fallback.")
+    # Quietly use fallback matching
 
 class JobMatcher:
     def __init__(self):

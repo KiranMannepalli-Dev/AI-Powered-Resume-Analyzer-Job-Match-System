@@ -26,7 +26,10 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
-app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
+if os.getenv('VERCEL'):
+    app.config['UPLOAD_FOLDER'] = os.path.join('/tmp', 'uploads')
+else:
+    app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = set(os.getenv('ALLOWED_EXTENSIONS', 'pdf,docx').split(','))
 
 # Enable CORS
@@ -46,7 +49,10 @@ ai_recommender = AIRecommender()
 news_fetcher = NewsFetcher()
 
 # Database setup
-db_path = os.getenv('DATABASE_PATH', 'resume_analyzer.db')
+if os.getenv('VERCEL'):
+    db_path = os.path.join('/tmp', 'resume_analyzer.db')
+else:
+    db_path = os.getenv('DATABASE_PATH', 'resume_analyzer.db')
 db_manager = DatabaseManager(db_path)
 
 # Ensure database and upload folder exist

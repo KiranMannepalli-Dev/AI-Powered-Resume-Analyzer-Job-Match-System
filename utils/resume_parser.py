@@ -12,7 +12,7 @@ try:
     SPACY_AVAILABLE = True
 except ImportError:
     SPACY_AVAILABLE = False
-    print("Warning: spaCy not installed. Keyword extraction will be limited.")
+    # Quietly handle missing spaCy
 from collections import Counter
 import os
 import urllib.parse
@@ -231,9 +231,33 @@ class ResumeParser:
         return 0
     
     def _extract_keywords(self, text):
-        """Extract important keywords using NLP"""
+        """Extract important keywords using NLP or regex fallback"""
         if not self.nlp:
-            return []
+            # Enhanced regex-based keyword extraction fallback
+            text = text.lower()
+            
+            # Remove common stop words
+            stop_words = {'the', 'a', 'an', 'in', 'on', 'at', 'for', 'to', 'of', 'with', 'and', 'or', 'so', 'but', 'is', 'are', 'was', 'were', 'be', 'been', 'has', 'have', 'had', 'do', 'does', 'did', 'this', 'that', 'these', 'those', 'my', 'your', 'his', 'her', 'its', 'our', 'their', 'what', 'which', 'who', 'whom', 'where', 'when', 'why', 'how', 'experience', 'education', 'skills', 'work', 'project', 'projects', 'summary', 'profile', 'contact', 'email', 'phone', 'address', 'linkedin', 'github', 'year', 'years', 'month', 'months', 'present', 'current', 'date', 'from', 'till'}
+            
+            # Find words that look like technical terms (n-grams could be better but single words for now)
+            # Filter for words > 2 chars, alphanumeric
+            words = re.findall(r'\b[a-z][a-z0-9+#]*\b', text)
+            
+            # Filter stop words and common resume structural words
+            filtered_words = [w for w in words if w not in stop_words and len(w) > 2]
+            
+            # Add known skill keywords to boost their frequency
+            known_skills = []
+            for category, sk_list in self.skill_keywords.items():
+                for sk in sk_list:
+                    if sk.lower() in text:
+                        known_skills.append(sk.lower())
+            
+            # Combine filtered words and known skills (giving more weight to known skills)
+            all_keywords = filtered_words + (known_skills * 2)
+            
+            keyword_freq = Counter(all_keywords)
+            return [word for word, freq in keyword_freq.most_common(20)]
         
         doc = self.nlp(text.lower())
         
