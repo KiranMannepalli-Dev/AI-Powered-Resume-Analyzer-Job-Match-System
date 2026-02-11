@@ -12,6 +12,7 @@ let skillsChart = null;
 document.addEventListener('DOMContentLoaded', () => {
     initializeUploadZone();
     addSmoothScrolling();
+    loadMarketIntel();
 });
 
 /**
@@ -613,3 +614,67 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+/**
+ * Load Market Intelligence (News & Jobs)
+ */
+async function loadMarketIntel() {
+    const techNewsList = document.getElementById('techNewsList');
+    const jobOpeningsList = document.getElementById('jobOpeningsList');
+
+    if (!techNewsList || !jobOpeningsList) return;
+
+    try {
+        const response = await fetch('/api/news-jobs');
+        const result = await response.json();
+
+        if (result.success) {
+            renderNewsList(techNewsList, result.data.news, 'news');
+            renderNewsList(jobOpeningsList, result.data.jobs, 'job');
+        } else {
+            throw new Error('Failed to load market data');
+        }
+    } catch (error) {
+        console.error('Market Intel Error:', error);
+        if (techNewsList) techNewsList.innerHTML = '<p class="text-error" style="color: var(--accent-color);">Failed to load news</p>';
+        if (jobOpeningsList) jobOpeningsList.innerHTML = '<p class="text-error" style="color: var(--accent-color);">Failed to load jobs</p>';
+    }
+}
+
+function renderNewsList(container, items, type) {
+    if (!items || items.length === 0) {
+        container.innerHTML = '<p class="text-muted">No updates available</p>';
+        return;
+    }
+
+    container.innerHTML = items.map(item => {
+        const date = new Date(item.time * 1000).toLocaleDateString();
+        const icon = type === 'news' ? '📰' : '💼';
+        const color = type === 'news' ? 'var(--primary-color)' : 'var(--accent-color)';
+
+        return `
+        <a href="${item.url}" target="_blank" class="news-item" style="
+            display: block;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.2s;
+            border-left: 3px solid ${color};
+        " onmouseover="this.style.transform='translateX(5px)'; this.style.background='rgba(255, 255, 255, 0.05)'" 
+           onmouseout="this.style.transform='translateX(0)'; this.style.background='rgba(255, 255, 255, 0.03)'">
+            <div style="font-weight: 500; margin-bottom: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                <span>${icon}</span>
+                <span style="line-height: 1.4;">${item.title}</span>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; padding-left: 1.5rem;">
+                <span>By ${item.by}</span>
+                <span>${date} • ${item.score || 0} pts</span>
+            </div>
+        </a>
+        `;
+    }).join('');
+}

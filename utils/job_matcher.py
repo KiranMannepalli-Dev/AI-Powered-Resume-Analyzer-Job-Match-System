@@ -1,17 +1,20 @@
-"""
-Job Matcher Module
-Matches resumes with job descriptions using AI and ML algorithms
-"""
-
 import re
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    import numpy as np
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    print("Warning: scikit-learn/numpy not found. Using simple keyword matching fallback.")
 
 class JobMatcher:
     def __init__(self):
         """Initialize job matcher"""
-        self.vectorizer = TfidfVectorizer(stop_words='english', max_features=500)
+        if SKLEARN_AVAILABLE:
+            self.vectorizer = TfidfVectorizer(stop_words='english', max_features=500)
+        else:
+            self.vectorizer = None
     
     def match(self, resume_data, job_description):
         """Match resume with job description"""
@@ -90,6 +93,19 @@ class JobMatcher:
     def _calculate_similarity(self, resume_text, job_description):
         """Calculate cosine similarity between resume and job description"""
         try:
+            if not SKLEARN_AVAILABLE or not self.vectorizer:
+                # Simple fallback: Jaccard similarity of words
+                resume_words = set(re.findall(r'\w+', resume_text.lower()))
+                job_words = set(re.findall(r'\w+', job_description.lower()))
+                
+                intersection = resume_words.intersection(job_words)
+                union = resume_words.union(job_words)
+                
+                if not union:
+                    return 0
+                
+                return (len(intersection) / len(union)) * 100
+
             # Create TF-IDF vectors
             tfidf_matrix = self.vectorizer.fit_transform([resume_text, job_description])
             
@@ -97,7 +113,8 @@ class JobMatcher:
             similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
             
             return similarity * 100
-        except:
+        except Exception as e:
+            print(f"Similarity calculation error: {e}")
             return 0
     
     def _extract_job_skills(self, job_description):

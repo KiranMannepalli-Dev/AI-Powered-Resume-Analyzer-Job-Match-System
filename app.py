@@ -16,6 +16,7 @@ from utils.resume_parser import ResumeParser
 from utils.job_matcher import JobMatcher
 from utils.ats_analyzer import ATSAnalyzer
 from utils.ai_recommender import AIRecommender
+from utils.news_fetcher import NewsFetcher
 from database.db_manager import DatabaseManager
 
 # Load environment variables
@@ -42,7 +43,11 @@ resume_parser = ResumeParser()
 job_matcher = JobMatcher()
 ats_analyzer = ATSAnalyzer()
 ai_recommender = AIRecommender()
-db_manager = DatabaseManager()
+news_fetcher = NewsFetcher()
+
+# Database setup
+db_path = os.getenv('DATABASE_PATH', 'resume_analyzer.db')
+db_manager = DatabaseManager(db_path)
 
 # Ensure database and upload folder exist
 db_manager.init_db()
@@ -272,6 +277,23 @@ def get_ats_score(resume_id):
         }), 200
         
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/news-jobs', methods=['GET'])
+def get_news_jobs():
+    """Get latest news and jobs"""
+    try:
+        # Use simple caching (in-memory) or fetch fresh
+        data = news_fetcher.get_latest_data()
+        
+        return jsonify({
+            'success': True,
+            'data': data
+        }), 200
+        
+    except Exception as e:
+        logger.exception("Error fetching news and jobs")
         return jsonify({'error': str(e)}), 500
 
 
